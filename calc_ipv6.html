@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Calculadora IPv6</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Estilo CSS Moderno para a Calculadora IPv6 */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #6a11cb, #2575fc); /* Gradiente de fundo */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        .calculator-container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2575fc;
+            margin-bottom: 25px;
+            font-size: 2em;
+            font-weight: 600;
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .input-section label {
+            text-align: left;
+            font-weight: 500;
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        .input-section input[type="text"],
+        .input-section input[type="number"] {
+            width: calc(100% - 20px); /* Ajusta a largura para padding */
+            padding: 12px 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease-in-out;
+        }
+
+        .input-section input[type="text"]:focus,
+        .input-section input[type="number"]:focus {
+            border-color: #6a11cb;
+            outline: none;
+            box-shadow: 0 0 5px rgba(106, 17, 203, 0.3);
+        }
+
+        .button-section {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .button-section button {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .button-section button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .results-section {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #eee;
+            text-align: left;
+        }
+
+        .results-section h2 {
+            color: #6a11cb;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .result-item {
+            margin-bottom: 10px;
+            font-size: 1em;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .result-item strong {
+            color: #333;
+            min-width: 180px; /* Garante alinhamento dos labels */
+            flex-basis: auto; /* Permite que o strong não quebre a linha se houver espaço */
+        }
+
+        .result-item span {
+            color: #0056b3;
+            font-weight: 500;
+            word-break: break-all; /* Quebra palavras longas para evitar overflow */
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .calculator-container {
+                padding: 20px 25px;
+                margin: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .button-section {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .button-section button {
+                width: 100%;
+                padding: 15px;
+            }
+
+            .result-item {
+                flex-direction: column; /* Em telas menores, strong e span ficam um em cima do outro */
+                margin-bottom: 15px;
+            }
+
+            .result-item strong {
+                min-width: unset; /* Remove o min-width para telas menores */
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <h1>Calculadora IPv6</h1>
+
+        <div class="input-section">
+            <label for="ipv6Address">Endereço IPv6:</label>
+            <input type="text" id="ipv6Address" placeholder="Ex: 2001:0db8:85a3:0000:0000:8a2e:0370:7334">
+            <label for="prefixLength">Prefixo (/):</label>
+            <input type="number" id="prefixLength" min="0" max="128" value="64">
+        </div>
+
+        <div class="button-section">
+            <button onclick="calculateIPv6()">Calcular</button>
+            <button onclick="clearFields()">Limpar</button>
+        </div>
+
+        <div class="results-section">
+            <h2>Resultados</h2>
+            <div class="result-item">
+                <strong>Endereço Compactado:</strong> <span id="compactedAddress"></span>
+            </div>
+            <div class="result-item">
+                <strong>Endereço Completo:</strong> <span id="fullAddress"></span>
+            </div>
+            <div class="result-item">
+                <strong>Tipo de Endereço:</strong> <span id="addressType"></span>
+            </div>
+            <div class="result-item">
+                <strong>Validação de Prefixo ISP:</strong> <span id="ispPrefixValidation"></span>
+            </div>
+            <div class="result-item">
+                <strong>Endereço de Rede:</strong> <span id="networkAddress"></span>
+            </div>
+            <div class="result-item">
+                <strong>Máscara de Sub-rede (Prefixo):</strong> <span id="subnetMask"></span>
+            </div>
+            <div class="result-item">
+                <strong>Número de Hosts Possíveis:</strong> <span id="numberOfHosts"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Função para expandir o IPv6 para sua forma completa (8 hextetos de 4 dígitos)
+        function getFullIPv6(ipv6) {
+            if (!ipv6) return '';
+
+            // Lida com a compactação '::'
+            if (ipv6.includes('::')) {
+                const parts = ipv6.split('::');
+                const left = parts[0].split(':').filter(p => p !== '');
+                const right = parts[1].split(':').filter(p => p !== '');
+                const missingBlocks = 8 - (left.length + right.length);
+                const zeros = Array(missingBlocks).fill('0000').join(':');
+                ipv6 = [...left, zeros, ...right].join(':');
+                ipv6 = ipv6.replace(/::/g, ':'); // Garante que não haja '::' remanescente
+            }
+
+            // Preenche os hextetos com zeros à esquerda
+            return ipv6.split(':').map(block => block.padStart(4, '0')).join(':');
+        }
+
+        // Função para compactar um IPv6
+        function getCompactedIPv6(fullIPv6) {
+            if (!fullIPv6) return '';
+            
+            // Remove zeros à esquerda em cada hexteto
+            let parts = fullIPv6.split(':').map(block => parseInt(block, 16).toString(16));
+
+            let maxZeroStartIndex = -1;
+            let maxZeroLength = 0;
+            let currentZeroLength = 0;
+            let currentZeroStartIndex = -1;
+
+            for (let i = 0; i < parts.length; i++) {
+                if (parts[i] === '0') {
+                    if (currentZeroStartIndex === -1) {
+                        currentZeroStartIndex = i;
+                    }
+                    currentZeroLength++;
+                } else {
+                    if (currentZeroLength > maxZeroLength) {
+                        maxZeroLength = currentZeroLength;
+                        maxZeroStartIndex = currentZeroStartIndex;
+                    }
+                    currentZeroLength = 0;
+                    currentZeroStartIndex = -1;
+                }
+            }
+            if (currentZeroLength > maxZeroLength) { 
+                maxZeroLength = currentZeroLength;
+                maxZeroStartIndex = currentZeroStartIndex;
+            }
+
+            if (maxZeroLength > 1) { // Só compacta se tiver pelo menos dois blocos de zeros
+                const before = parts.slice(0, maxZeroStartIndex);
+                const after = parts.slice(maxZeroStartIndex + maxZeroLength);
+                return [...before, '', ...after].join(':');
+            }
+            
+            return parts.join(':');
+        }
+
+        // Função para converter um IPv6 completo para binário (string de 128 bits)
+        function ipv6ToBinary(fullIPv6) {
+            return fullIPv6.split(':').map(h => parseInt(h, 16).toString(2).padStart(16, '0')).join('');
+        }
+
+        // Função para converter uma string binária de 128 bits para IPv6 completo
+        function binaryToFullIPv6(binaryString) {
+            let fullIPv6Parts = [];
+            for (let i = 0; i < 128; i += 16) {
+                const chunk = binaryString.substring(i, i + 16);
+                fullIPv6Parts.push(parseInt(chunk, 2).toString(16).padStart(4, '0'));
+            }
+            return fullIPv6Parts.join(':');
+        }
+
+        function calculateIPv6() {
+            const ipv6AddressInput = document.getElementById('ipv6Address').value.trim();
+            const prefixLength = parseInt(document.getElementById('prefixLength').value, 10);
+
+            // --- Validação do IPv6 ---
+            const ipv6Regex = /(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:))/i;
+
+            if (!ipv6AddressInput) {
+                alert('Por favor, insira um endereço IPv6.');
+                return;
+            }
+
+            if (!ipv6Regex.test(ipv6AddressInput)) {
+                alert('Por favor, insira um endereço IPv6 válido.');
+                return;
+            }
+            
+            if (prefixLength < 0 || prefixLength > 128 || isNaN(prefixLength)) {
+                alert('Por favor, insira um comprimento de prefixo válido (0-128).');
+                return;
+            }
+
+            // --- Gerar o endereço IPv6 completo e compactado ---
+            const fullIPv6 = getFullIPv6(ipv6AddressInput);
+            const compactedIPv6 = getCompactedIPv6(fullIPv6); 
+
+            // --- Determinar o Tipo de Endereço IPv6 ---
+            let addressType = "Desconhecido";
+            const firstHextet = parseInt(fullIPv6.substring(0, 4), 16); 
+            const fullIPv6Binary = ipv6ToBinary(fullIPv6);
+
+            if (ipv6AddressInput === '::1' || fullIPv6 === '0000:0000:0000:0000:0000:0000:0000:0001') {
+                addressType = "Loopback";
+            } else if (ipv6AddressInput === '::' || fullIPv6 === '0000:0000:0000:0000:0000:0000:0000:0000') {
+                addressType = "Endereço Não Especificado";
+            } else if (firstHextet >= 0x2000 && firstHextet <= 0x3FFF) { // 2000::/3
+                addressType = "Global Unicast (Público)";
+            } else if (fullIPv6Binary.startsWith('1111111010')) { // FE80::/10
+                addressType = "Link-Local";
+            } else if (fullIPv6Binary.startsWith('1111110')) { // FC00::/7 (ULA)
+                addressType = "Unique Local Address (ULA) - Privado";
+            } else if (fullIPv6Binary.startsWith('11111111')) { // FF00::/8 (Multicast)
+                addressType = "Multicast";
+            } else {
+                addressType = "Outro Tipo (ou não padrão)";
+            }
+
+            // --- Validação de Prefixo para ISP ---
+            let ispPrefixValidation = "Não se aplica";
+            if (addressType === "Global Unicast (Público)" || addressType === "Unique Local Address (ULA) - Privado") {
+                if (prefixLength >= 32 && prefixLength <= 48) {
+                    ispPrefixValidation = "Comprimento de prefixo comum para delegação a grandes organizações/ISPs.";
+                } else if (prefixLength >= 56 && prefixLength <= 60) {
+                    ispPrefixValidation = "Comprimento de prefixo comum para delegação a usuários finais/pequenas empresas.";
+                } else if (prefixLength === 64) {
+                    ispPrefixValidation = "Comprimento de prefixo padrão para sub-redes (links/LANs).";
+                } else if (prefixLength > 64 && prefixLength < 128) {
+                    ispPrefixValidation = "Comprimento de prefixo maior que o padrão /64 (possível para links ponto-a-ponto, mas pode impactar SLAAC).";
+                } else if (prefixLength === 128) {
+                    ispPrefixValidation = "Endereço de host único (sem sub-redes).";
+                } else {
+                    ispPrefixValidation = "Comprimento de prefixo atípico para delegação ou sub-rede.";
+                }
+            }
+
+
+            // --- Cálculo do Endereço de Rede ---
+            let networkAddress = "";
+            if (fullIPv6Binary) {
+                // Pega a parte do prefixo
+                const networkPartBinary = fullIPv6Binary.substring(0, prefixLength);
+                // Preenche o restante com zeros (parte do host)
+                const hostPartZeros = '0'.repeat(128 - prefixLength);
+                const networkAddressBinary = networkPartBinary + hostPartZeros;
+                networkAddress = binaryToFullIPv6(networkAddressBinary);
+                networkAddress = getCompactedIPv6(networkAddress); // Compacta o endereço de rede
+            } else {
+                networkAddress = "N/A";
+            }
+            
+
+            // --- Número de Hosts Possíveis ---
+            const numberOfHosts = (128 - prefixLength) >= 0 ? 
+                                  `2^${(128 - prefixLength)} (${Math.pow(2, (128 - prefixLength)).toLocaleString()})` : 
+                                  "Inválido";
+            if (prefixLength === 128) { // Apenas um host
+                numberOfHosts = "1";
+            }
+
+
+            // Atualiza os elementos HTML com os resultados
+            document.getElementById('compactedAddress').innerText = compactedIPv6;
+            document.getElementById('fullAddress').innerText = fullIPv6;
+            document.getElementById('addressType').innerText = addressType;
+            document.getElementById('ispPrefixValidation').innerText = ispPrefixValidation;
+            document.getElementById('networkAddress').innerText = networkAddress;
+            document.getElementById('subnetMask').innerText = `/${prefixLength}`;
+            document.getElementById('numberOfHosts').innerText = numberOfHosts;
+        }
+
+        function clearFields() {
+            document.getElementById('ipv6Address').value = '';
+            document.getElementById('prefixLength').value = '64';
+            document.getElementById('compactedAddress').innerText = '';
+            document.getElementById('fullAddress').innerText = '';
+            document.getElementById('addressType').innerText = '';
+            document.getElementById('ispPrefixValidation').innerText = '';
+            document.getElementById('networkAddress').innerText = '';
+            document.getElementById('subnetMask').innerText = '';
+            document.getElementById('numberOfHosts').innerText = '';
+        }
+    </script>
+</body>
+</html>
